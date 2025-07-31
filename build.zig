@@ -26,6 +26,18 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
+    const mustache_dep = b.dependency("mustache", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    exe_mod.addImport("mustache", mustache_dep.module("mustache"));
+
+    const ziggy_dep = b.dependency("ziggy", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    exe_mod.addImport("ziggy", ziggy_dep.module("ziggy"));
+
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
     // rather than a static library.
     const exe = b.addExecutable(.{
