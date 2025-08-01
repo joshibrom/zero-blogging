@@ -22,11 +22,10 @@ pub fn main() !void {
 
     const inputs = try VIEW_CONFIG.readStrings(arena);
 
-    const templ = try mustache.allocRenderTextPartials(
+    const templ = try views.renderTemplate(
         arena,
-        inputs.base,
-        inputs.partials,
-        .{ .content = "Hello, world!" },
+        &inputs,
+        &views.PageData{ .content = "Hello, world!" },
     );
     defer allocator.deinit();
 

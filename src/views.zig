@@ -1,4 +1,5 @@
 const std = @import("std");
+const mustache = @import("mustache");
 
 const Allocator = std.mem.Allocator;
 
@@ -38,3 +39,21 @@ pub const ViewConfig = struct {
         return f.readToEndAlloc(allocator, 10000);
     }
 };
+
+pub const PageData = struct {
+    title: ?[]const u8 = null,
+    content: []const u8,
+};
+
+pub fn renderTemplate(
+    allocator: Allocator,
+    views: *const ViewConfig.ViewStrings,
+    data: *const PageData,
+) ![]const u8 {
+    return mustache.allocRenderTextPartials(
+        allocator,
+        views.base,
+        views.partials,
+        data,
+    );
+}
