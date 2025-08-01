@@ -6,31 +6,56 @@ const mustache = @import("mustache");
 
 const Allocator = std.mem.Allocator;
 
-const VIEW_CONFIG = .{
-    .base = "views/base.must.html",
-    .partials = .{
-        .{ "header", "views/header.must.html" },
-        .{ "footer", "views/footer.must.html" },
-    },
+const ViewConfig = struct {
+    const Self = @This();
+
+    const PartialConfig = struct { name: []const u8, path: []const u8 };
+
+    const ViewStrings = struct {
+        const Partial = struct { []const u8, []const u8 };
+
+        base: []const u8,
+        partials: []const Self.ViewStrings.Partial,
+    };
+
+    base: []const u8,
+    partials: []const PartialConfig,
+
+    pub fn readStrings(self: *const Self, allocator: Allocator) !ViewStrings {
+        var partials = std.ArrayList(Self.ViewStrings.Partial).init(allocator);
+
+        for (self.partials) |pc| {
+            try partials.append(.{
+                pc.name, try Self.readToString(allocator, pc.path),
+            });
+        }
+
+        return .{
+            .base = try Self.readToString(allocator, self.base),
+            .partials = try partials.toOwnedSlice(),
+        };
+    }
+
+    fn readToString(allocator: Allocator, fname: []const u8) ![]const u8 {
+        const f = try std.fs.cwd().openFile(fname, .{});
+        defer f.close();
+        return f.readToEndAlloc(allocator, 10000);
+    }
 };
 
-fn readToString(allocator: Allocator, fname: []const u8) ![]const u8 {
-    const f = try std.fs.cwd().openFile(fname, .{});
-    defer f.close();
-    return f.readToEndAlloc(allocator, 10000);
-}
+const VIEW_CONFIG = ViewConfig{
+    .base = "views/base.must.html",
+    .partials = &[_]ViewConfig.PartialConfig{
+        .{ .name = "header", .path = "views/header.must.html" },
+        .{ .name = "footer", .path = "views/footer.must.html" },
+    },
+};
 
 pub fn main() !void {
     var allocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     const arena = allocator.allocator();
 
-    const inputs = .{
-        .base = try readToString(arena, VIEW_CONFIG.base),
-        .partials = .{
-            .{ "header", try readToString(arena, VIEW_CONFIG.partials[0][1]) },
-            .{ "footer", try readToString(arena, VIEW_CONFIG.partials[1][1]) },
-        },
-    };
+    const inputs = try VIEW_CONFIG.readStrings(arena);
 
     const templ = try mustache.allocRenderTextPartials(
         arena,
