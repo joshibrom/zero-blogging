@@ -22,7 +22,7 @@ pub fn main() !void {
 
     const inputs = try VIEW_CONFIG.readStrings(arena);
 
-    const templ = try mustache.allocRenderTextPartials(
+    const templ = try views.renderTemplate(
         arena,
         inputs.base,
         inputs.partials,

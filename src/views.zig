@@ -1,4 +1,5 @@
 const std = @import("std");
+const mustache = @import("mustache");
 
 const Allocator = std.mem.Allocator;
 
@@ -38,3 +39,17 @@ pub const ViewConfig = struct {
         return f.readToEndAlloc(allocator, 10000);
     }
 };
+
+pub fn renderTemplate(
+    allocator: Allocator,
+    templ: []const u8,
+    partials: []const ViewConfig.ViewStrings.Partial,
+    data: anytype,
+) ![]const u8 {
+    return mustache.allocRenderTextPartials(
+        allocator,
+        templ,
+        partials,
+        data,
+    );
+}
