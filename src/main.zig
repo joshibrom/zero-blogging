@@ -2,10 +2,17 @@
 //! you are building an executable. If you are making a library, the convention
 //! is to delete this file and start with root.zig instead.
 const std = @import("std");
+const mustache = @import("mustache");
 
 const Allocator = std.mem.Allocator;
 
-const TEMPL_BASE = "views/base.must.html";
+const VIEW_CONFIG = .{
+    .base = "views/base.must.html",
+    .partials = .{
+        .{ "header", "views/header.must.html" },
+        .{ "footer", "views/footer.must.html" },
+    },
+};
 
 fn readToString(allocator: Allocator, fname: []const u8) ![]const u8 {
     const f = try std.fs.cwd().openFile(fname, .{});
@@ -14,12 +21,24 @@ fn readToString(allocator: Allocator, fname: []const u8) ![]const u8 {
 }
 
 pub fn main() !void {
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    var allocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+    const arena = allocator.allocator();
 
-    const templ = try readToString(std.heap.page_allocator, TEMPL_BASE);
-    try stdout.print("{s}\n", .{templ});
+    const inputs = .{
+        .base = try readToString(arena, VIEW_CONFIG.base),
+        .partials = .{
+            .{ "header", try readToString(arena, VIEW_CONFIG.partials[0][1]) },
+            .{ "footer", try readToString(arena, VIEW_CONFIG.partials[1][1]) },
+        },
+    };
 
-    try bw.flush(); // Don't forget to flush!
+    const templ = try mustache.allocRenderTextPartials(
+        arena,
+        inputs.base,
+        inputs.partials,
+        .{ .content = "Hello, world!" },
+    );
+    defer allocator.deinit();
+
+    std.debug.print("{s}\n", .{templ});
 }
