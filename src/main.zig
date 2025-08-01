@@ -4,48 +4,13 @@
 const std = @import("std");
 const mustache = @import("mustache");
 
+const views = @import("views.zig");
+
 const Allocator = std.mem.Allocator;
 
-const ViewConfig = struct {
-    const Self = @This();
-
-    const PartialConfig = struct { name: []const u8, path: []const u8 };
-
-    const ViewStrings = struct {
-        const Partial = struct { []const u8, []const u8 };
-
-        base: []const u8,
-        partials: []const Self.ViewStrings.Partial,
-    };
-
-    base: []const u8,
-    partials: []const PartialConfig,
-
-    pub fn readStrings(self: *const Self, allocator: Allocator) !ViewStrings {
-        var partials = std.ArrayList(Self.ViewStrings.Partial).init(allocator);
-
-        for (self.partials) |pc| {
-            try partials.append(.{
-                pc.name, try Self.readToString(allocator, pc.path),
-            });
-        }
-
-        return .{
-            .base = try Self.readToString(allocator, self.base),
-            .partials = try partials.toOwnedSlice(),
-        };
-    }
-
-    fn readToString(allocator: Allocator, fname: []const u8) ![]const u8 {
-        const f = try std.fs.cwd().openFile(fname, .{});
-        defer f.close();
-        return f.readToEndAlloc(allocator, 10000);
-    }
-};
-
-const VIEW_CONFIG = ViewConfig{
+const VIEW_CONFIG = views.ViewConfig{
     .base = "views/base.must.html",
-    .partials = &[_]ViewConfig.PartialConfig{
+    .partials = &[_]views.ViewConfig.PartialConfig{
         .{ .name = "header", .path = "views/header.must.html" },
         .{ .name = "footer", .path = "views/footer.must.html" },
     },
