@@ -5,6 +5,7 @@ const std = @import("std");
 const mustache = @import("mustache");
 
 const views = @import("views.zig");
+const generator = @import("generator.zig");
 
 const Allocator = std.mem.Allocator;
 
@@ -19,15 +20,6 @@ const VIEW_CONFIG = views.ViewConfig{
 pub fn main() !void {
     var allocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     const arena = allocator.allocator();
-
-    const inputs = try VIEW_CONFIG.readStrings(arena);
-
-    const templ = try views.renderTemplate(
-        arena,
-        &inputs,
-        &views.PageData{ .content = "Hello, world!" },
-    );
     defer allocator.deinit();
-
-    std.debug.print("{s}\n", .{templ});
+    try generator.renderFileToStorage(arena, "hello.html", &views.PageData{ .content = "Hello, world!" });
 }
