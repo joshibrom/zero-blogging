@@ -1,1 +1,9 @@
-<footer>I'm the footer.</footer>
+<footer>
+    Joshua Ibrom, 2025
+</footer>
+
+<script>
+    const footer = document.querySelector('footer');
+    const year = new Date().getFullYear();
+    footer.textContent = footer.textContent.replace('2025', year);
+</script>

@@ -41,7 +41,9 @@ pub const ViewConfig = struct {
 };
 
 pub const PageData = struct {
-    title: ?[]const u8 = null,
+    title: []const u8 = "josh's logging & blogging",
+    subtitle: ?[]const u8 = null,
+    showSubtitle: bool = false,
     content: []const u8,
 };
 
