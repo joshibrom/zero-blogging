@@ -29,15 +29,15 @@ fn ensureSaveDirectory() !void {
     };
 }
 
-fn save(allocator: Allocator, fname: []const u8, markup: []const u8) !usize {
+fn save(allocator: Allocator, path: []const u8, fname: []const u8, markup: []const u8) !usize {
     try ensureSaveDirectory();
-    const filename = try std.fmt.allocPrint(allocator, "www/posts/{s}", .{fname});
+    const filename = try std.fmt.allocPrint(allocator, "www/{s}/{s}", .{ path, fname });
     const f = try std.fs.cwd().createFile(filename, .{});
     defer f.close();
     return try f.write(markup);
 }
 
-pub fn renderFileToStorage(allocator: Allocator, fname: []const u8, data: *const views.PageData) !void {
+pub fn renderFileToStorage(allocator: Allocator, path: []const u8, fname: []const u8, data: *const views.PageData) !void {
     const markup = try generate(allocator, data);
-    if (try save(allocator, fname, markup) == 0) return error.NothingWritten;
+    if (try save(allocator, path, fname, markup) == 0) return error.NothingWritten;
 }

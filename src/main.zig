@@ -21,5 +21,6 @@ pub fn main() !void {
     var allocator = std.heap.ArenaAllocator.init(std.heap.page_allocator);
     const arena = allocator.allocator();
     defer allocator.deinit();
-    try generator.renderFileToStorage(arena, "hello.html", &views.PageData{ .subtitle = "hello page", .content = "Hello, world!" });
+    try generator.renderFileToStorage(arena, "", "index.html", &views.PageData{ .subtitle = null, .content = "This is the index page." });
+    try generator.renderFileToStorage(arena, "posts", "hello.html", &views.PageData{ .subtitle = "hello page", .content = "Hello, world!" });
 }
