@@ -1,12 +1,15 @@
 <header>
-    <div class="nb-navbar">
-        <h2>{{title}}{{#showSubtitle}}{{#subtitle}}: {{subtitle}}{{/subtitle}}{{/showSubtitle}}</h2>
-        <nav>
-            <ul class="nav-links">
-                <li><a href="/">home</a></li>
-                <li><a href="/about">about</a></li>
-                <li><a href="https://joshuaibrom.com" target="_blank">portfolio</a></li>
-            </ul>
-        </nav>
-    </div>
+    <nav class="nb-navbar nb-m-sm-1 nb-m-4">
+        <a href="/" class="nb-navbar-brand" aria-label="Go to homepage">{{title}}{{#showSubtitle}}{{#subtitle}}: {{subtitle}}{{/subtitle}}{{/showSubtitle}}</a>
+        <ul class="nb-navbar-nav" id="site-navigation">
+            <li class="nb-navbar-item" role="none"><a href="/" class="nb-navbar-link">home</a></li>
+            <li class="nb-navbar-item" role="none"><a href="/about" class="nb-navbar-link">about</a></li>
+            <li class="nb-navbar-item" role="none"><a href="https://joshuaibrom.com" target="_blank" class="nb-navbar-link">portfolio</a></li>
+        </ul>
+    </nav>
+    <script>
+        document.querySelectorAll('#site-navigation li a').forEach(anchor => {
+            if (anchor.href === window.location.href) anchor.classList.add('active');
+        });
+    </script>
 </header>
